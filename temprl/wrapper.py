@@ -162,9 +162,10 @@ class TemporalGoalWrapperSynthetic(gym.Wrapper):
         obs, reward, done, info = super().step(action)
 
         # self.transitions = self.automaton.get_transitions()
-        # Transitions example: 
-        # {(3, True, 3), (1, '~red', 1), (2, True, 3), (0, ' blue', 1), (0, ' ~blue', 0), (1, 'red', 2)}
         next_automata_states = [t[2] for t in self.transitions if t[0]==self.state]
+        # The lenght is 1 only if the final transition
+        if len(next_automata_states) == 1:
+            done = True
         next_automata_state = random.choice(next_automata_states)
         self.state = next_automata_state
 
@@ -175,6 +176,5 @@ class TemporalGoalWrapperSynthetic(gym.Wrapper):
     def reset(self, **_kwargs):
         """Reset the Gym environment."""
         obs = super().reset()
-        # fluents = self.fluent_extractor(obs, None)
-        # automata_states = [tg.reset(fluents) for tg in self.temp_goals]
-        return obs, 0
+        self.state = 0
+        return obs, [self.state]
