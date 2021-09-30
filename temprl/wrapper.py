@@ -21,6 +21,7 @@
 #
 
 """Main module."""
+import random
 import logging
 from abc import ABC
 from typing import List, Tuple
@@ -160,11 +161,13 @@ class TemporalGoalWrapperSynthetic(gym.Wrapper):
         """Do a step in the Gym environment."""
         obs, reward, done, info = super().step(action)
 
-        # next_automata_states = possible states from self.state taken from transitions
-        
+        # self.transitions = self.automaton.get_transitions()
+        next_automata_states = [t[2] for t in self.transitions if t[0]==self.state]
+        next_automata_state = random.choice(next_automata_states)
+        self.state = next_automata_state
 
         obs_prime = (obs, next_automata_states)
-        reward_prime = reward + 0
+        reward_prime = reward + 0 # What reward should we choose?
         return obs_prime, reward_prime, done, info
 
     def reset(self, **_kwargs):
