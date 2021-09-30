@@ -136,3 +136,49 @@ class TemporalGoalWrapper(gym.Wrapper):
         fluents = self.fluent_extractor(obs, None)
         automata_states = [tg.reset(fluents) for tg in self.temp_goals]
         return obs, automata_states
+
+class TemporalGoalWrapperSynthetic(gym.Wrapper):
+    """Gym wrapper to include a temporal goal in the environment."""
+
+    def __init__(
+        self,
+        env: gym.Env,
+        temp_goals: List[TemporalGoal],
+        fluent_extractor: FluentExtractor,
+    ):
+        """
+        Wrap a Gym environment with a temporal goal.
+
+        :param env: the Gym environment to wrap.
+        :param temp_goals: the temporal goal to be learnt
+        :param fluent_extractor: the extractor of the fluents.
+          A callable that takes in input an observation and the last action
+          taken, and returns the set of fluents true in the current state.
+        """
+        super().__init__(env)
+        self.temp_goals = temp_goals
+        self.fluent_extractor: FluentExtractor = fluent_extractor
+        self.observation_space = self._get_observation_space()
+
+    def _get_observation_space(self) -> gym.spaces.Space:
+        """Return the observation space."""
+        temp_goals_shape = tuple(tg.observation_space.n for tg in self.temp_goals)
+        return GymTuple((self.env.observation_space, MultiDiscrete(temp_goals_shape)))
+
+    def step(self, action):
+        """Do a step in the Gym environment."""
+        obs, reward, done, info = super().step(action)
+        fluents = self.fluent_extractor(obs, action)
+        states_and_rewards = [tg.step(fluents) for tg in self.temp_goals]
+        next_automata_states, temp_goal_rewards = zip(*states_and_rewards)
+        total_goal_rewards = sum(temp_goal_rewards)
+        obs_prime = (obs, next_automata_states)
+        reward_prime = reward + total_goal_rewards
+        return obs_prime, reward_prime, done, info
+
+    def reset(self, **_kwargs):
+        """Reset the Gym environment."""
+        obs = super().reset()
+        fluents = self.fluent_extractor(obs, None)
+        automata_states = [tg.reset(fluents) for tg in self.temp_goals]
+        return obs, automata_states
