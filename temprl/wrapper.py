@@ -157,13 +157,14 @@ class TemporalGoalWrapperSynthetic(gym.Wrapper):
         self.automaton = automaton
         self.transitions = automaton.get_transitions()
 
-    def step(self, action):
+    def step(self, state, action):
         """Do a step in the Gym environment."""
         obs, reward, done, info = super().step(action)
 
         # Transitions example: 
         # {(3, True, 3), (1, '~red', 1), (2, True, 3), (0, ' blue', 1), (0, ' ~blue', 0), (1, 'red', 2)}
-        next_automata_states = [t[2] for t in self.transitions if t[0]==self.state]
+        # next_automata_states = [t[2] for t in self.transitions if t[0]==self.state]
+        next_automata_states = [t[2] for t in self.transitions if t[0]==state]
         # The lenght is 1 only if the final transition
         if len(next_automata_states) == 1:
             done = True
