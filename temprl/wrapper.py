@@ -34,6 +34,8 @@ from pythomata.core import DFA
 from temprl.automata import RewardDFA, RewardDFASimulator
 from temprl.types import FluentExtractor, Interpretation, State
 
+SEED = 1234
+random.seed(SEED)
 logger = logging.getLogger(__name__)
 
 
@@ -163,7 +165,6 @@ class TemporalGoalWrapperSynthetic(gym.Wrapper):
 
         # Transitions example: 
         # {(3, True, 3), (1, '~red', 1), (2, True, 3), (0, ' blue', 1), (0, ' ~blue', 0), (1, 'red', 2)}
-        # next_automata_states = [t[2] for t in self.transitions if t[0]==self.state]
         next_automata_states = [t[2] for t in self.transitions if t[0]==state]
         # The lenght is 1 only if the final transition
         if len(next_automata_states) == 1:
