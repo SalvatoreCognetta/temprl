@@ -172,7 +172,7 @@ class TemporalGoalWrapperSynthetic(gym.Wrapper):
         next_automata_state = random.choice(next_automata_states)
         self.state = next_automata_state
 
-        obs_prime = (obs, next_automata_states)
+        obs_prime = (obs, [next_automata_state])
         reward_prime = reward + 0 # What reward should we choose?
         return obs_prime, reward_prime, done, info
 
